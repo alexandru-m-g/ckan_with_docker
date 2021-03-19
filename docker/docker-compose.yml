@@ -1,0 +1,40 @@
+version: "3.1"
+
+services:
+  solr:
+    image: solr:7-slim
+    ulimits:
+      nofile:
+        soft: 65000
+        hard: 65000
+    hostname: solr
+    volumes:
+      - "./solr/conf:/opt/solr/server/solr/ckan"
+      - "${SOLR_DATA_HOST_FOLDER:-./solr_data}:/opt/solr/server/solr/ckan/data"
+
+  postgres:
+    image: postgres:11-alpine
+    hostname: postgres
+    env_file:
+      - ./postgres/postgres.env
+    volumes:
+      - "${POSTGRES_DATA_HOST_FOLDER:-./postgres_data}:/var/lib/postgresql/data"
+
+  dataproxy:
+    image: unocha/hdx-dataproxy:2.5
+    hostname: dataproxy
+
+  ckan:
+    build: ../.
+    hostname: ckan
+    depends_on:
+      - solr
+      - postgres
+    volumes:
+      - "./ckan/etc:/etc/ckan"
+      - "${CKAN_DATA_HOST_FOLDER:-./ckan_data}:/var/lib/ckan"
+    ports:
+      - "127.0.0.1:5000:5000"
+    entrypoint: "tail -f /dev/null"
+#    entrypoint: "gunicorn -w 2 -b 0.0.0.0:5000 wsgi:application"
+
