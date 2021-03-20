@@ -26,6 +26,8 @@ services:
     image: unocha/hdx-dataproxy:2.5
     restart: "${CKAN_RESTART_POLICY:-no}"
     hostname: dataproxy
+    ports:
+      - "127.0.0.1:5001:5000"
 
   ckan:
     image: mgalex/ckan_with_docker:0.0.1-a1
