@@ -50,4 +50,5 @@ contrib/docker/.env
 cypress.env.json
 
 # customize
+*.env
 !docker/ckan/etc/ckan.ini
