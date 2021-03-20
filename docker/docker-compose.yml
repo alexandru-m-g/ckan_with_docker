@@ -3,6 +3,7 @@ version: "3.1"
 services:
   solr:
     image: solr:7-slim
+    restart: "${CKAN_RESTART_POLICY:-no}"
     ulimits:
       nofile:
         soft: 65000
@@ -14,6 +15,7 @@ services:
 
   postgres:
     image: postgres:11-alpine
+    restart: "${CKAN_RESTART_POLICY:-no}"
     hostname: postgres
     env_file:
       - ./postgres/postgres.env
@@ -22,10 +24,13 @@ services:
 
   dataproxy:
     image: unocha/hdx-dataproxy:2.5
+    restart: "${CKAN_RESTART_POLICY:-no}"
     hostname: dataproxy
 
   ckan:
-    build: ../.
+    image: mgalex/ckan_with_docker:0.0.1-a1
+#    build: ../.
+    restart: "${CKAN_RESTART_POLICY:-no}"
     hostname: ckan
     depends_on:
       - solr
@@ -35,6 +40,6 @@ services:
       - "${CKAN_DATA_HOST_FOLDER:-./ckan_data}:/var/lib/ckan"
     ports:
       - "127.0.0.1:5000:5000"
-    entrypoint: "tail -f /dev/null"
-#    entrypoint: "gunicorn -w 2 -b 0.0.0.0:5000 wsgi:application"
+#    entrypoint: "tail -f /dev/null"
+    entrypoint: /bin/bash -c "ln -sf /etc/ckan/ckan.ini ckan.ini && gunicorn -w 2 -b 0.0.0.0:5000 wsgi:application"
 
